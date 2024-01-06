@@ -1,3 +1,4 @@
 <resources>
     <string name="app_name">LightPulse</string>
+    <string name="power_on_icon">power on icon</string>
 </resources>
