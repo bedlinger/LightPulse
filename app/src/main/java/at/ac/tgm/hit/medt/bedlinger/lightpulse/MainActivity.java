@@ -101,6 +101,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void sendSOS() {
+        powerButton.setEnabled(false);
         new Thread(() -> {
             try {
                 // SOS in Morse code ist -> ...---...
@@ -113,7 +114,6 @@ public class MainActivity extends AppCompatActivity {
                     }
                     Thread.sleep(time);
                 }
-                // Ensure the flashlight is off at the end
                 if (isTaschenlampeOn) {
                     taschenlampeOff();
                 }
