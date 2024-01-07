@@ -95,5 +95,6 @@ public class MainActivity extends AppCompatActivity {
         alert.setTitle(title);
         alert.setMessage(message);
         alert.setButton(AlertDialog.BUTTON_POSITIVE, "OK", (dialog, which) -> finish());
+        alert.show();
     }
 }
