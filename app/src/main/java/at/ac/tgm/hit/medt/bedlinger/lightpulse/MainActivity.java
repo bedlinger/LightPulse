@@ -1,9 +1,5 @@
 package at.ac.tgm.hit.medt.bedlinger.lightpulse;
 
-import androidx.appcompat.app.AlertDialog;
-import androidx.appcompat.app.AppCompatActivity;
-import androidx.core.content.ContextCompat;
-
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -22,7 +18,10 @@ import android.widget.Button;
 import android.widget.ImageButton;
 import android.widget.SeekBar;
 import android.widget.TextView;
-import android.widget.Toast;
+
+import androidx.appcompat.app.AlertDialog;
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.content.ContextCompat;
 
 public class MainActivity extends AppCompatActivity implements SensorEventListener {
 
@@ -43,8 +42,8 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
     private int helligkeit = 100;
     private BroadcastReceiver akkuReceiver;
     private boolean hasAccelerometer;
-    private boolean checkForSOS = true;
-    private boolean powerOnShake = false;
+    private final boolean checkForSOS = false;
+    private final boolean powerOnShake = true;
     private SensorManager sensorManager;
     private long lastUpdate;
 
@@ -75,8 +74,7 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
                     public void onStopTrackingTouch(SeekBar seekBar) {
                     }
                 });
-            }
-            else {
+            } else {
                 helligkeitSlider.setEnabled(false);
                 AlertDialog alert = new AlertDialog.Builder(MainActivity.this).create();
                 alert.setTitle("Hinweis");
@@ -91,8 +89,7 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
         powerButton.setOnClickListener(v -> {
             if (isTaschenlampeOn) {
                 taschenlampeOff();
-            }
-            else {
+            } else {
                 taschenlampeOn(helligkeit);
             }
         });
@@ -105,8 +102,7 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
         boolean isFlashAvailable = getApplicationContext().getPackageManager().hasSystemFeature(PackageManager.FEATURE_CAMERA_FLASH);
         if (!isFlashAvailable) {
             showErrorAlert("Error", "Ihr Gerät unterstützt keine Taschenlampe.");
-        }
-        else {
+        } else {
             CameraManager = (CameraManager) getSystemService(CAMERA_SERVICE);
             try {
                 cameraId = CameraManager.getCameraIdList()[0];
@@ -137,7 +133,7 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
         int level = intent.getIntExtra(BatteryManager.EXTRA_LEVEL, -1);
         int scale = intent.getIntExtra(BatteryManager.EXTRA_SCALE, -1);
 
-        int batteryPct = Math.round(level / (float)scale * 100);
+        int batteryPct = Math.round(level / (float) scale * 100);
 
         if (batteryPct <= 20) {
             akkuTextView.setTextColor(ContextCompat.getColor(this, R.color.batteryPctLow));
@@ -184,8 +180,7 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
                 int maxHelligkeit = CameraManager.getCameraCharacteristics(cameraId).get(CameraCharacteristics.FLASH_INFO_STRENGTH_MAXIMUM_LEVEL);
                 int mappedHelligkeit = (helligkeit * maxHelligkeit) / 100;
                 CameraManager.turnOnTorchWithStrengthLevel(cameraId, mappedHelligkeit);
-            }
-            else {
+            } else {
                 taschenlampeOn();
             }
         } catch (CameraAccessException e) {
@@ -227,8 +222,7 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
                 if (acceleration > SHAKE_THRESHOLD_POWER_OFF) {
                     if (isTaschenlampeOn) {
                         taschenlampeOff();
-                    }
-                    else {
+                    } else {
                         taschenlampeOn(helligkeit);
                     }
                 }
