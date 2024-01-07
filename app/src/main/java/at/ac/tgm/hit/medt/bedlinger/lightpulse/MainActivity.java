@@ -42,6 +42,39 @@ public class MainActivity extends AppCompatActivity {
 
         this.init();
 
+        try {
+            if (CameraManager.getCameraCharacteristics(cameraId).get(CameraCharacteristics.FLASH_INFO_STRENGTH_MAXIMUM_LEVEL) > 1) {
+                hatHelligkeitsregelung = true;
+                helligkeitSlider.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
+                    @Override
+                    public void onProgressChanged(SeekBar seekBar, int helligkeit, boolean fromUser) {
+                        MainActivity.this.helligkeit = helligkeit;
+                        if (isTaschenlampeOn) {
+                            taschenlampeOn(helligkeit);
+                        }
+                    }
+
+                    @Override
+                    public void onStartTrackingTouch(SeekBar seekBar) {
+                    }
+
+                    @Override
+                    public void onStopTrackingTouch(SeekBar seekBar) {
+                    }
+                });
+            }
+            else {
+                helligkeitSlider.setEnabled(false);
+                AlertDialog alert = new AlertDialog.Builder(MainActivity.this).create();
+                alert.setTitle("Hinweis");
+                alert.setMessage("Ihr Gerät unterstützt keine Helligkeitsregelung der Taschenlampe.");
+                alert.setButton(AlertDialog.BUTTON_POSITIVE, "OK", (dialog, which) -> dialog.dismiss());
+                alert.show();
+            }
+        } catch (CameraAccessException e) {
+            showErrorAlert("Error", "Es gab einen Fehler beim Zugriff auf die Taschenlampe.");
+        }
+
         powerButton.setOnClickListener(v -> {
             if (isTaschenlampeOn) {
                 taschenlampeOff();
@@ -68,7 +101,6 @@ public class MainActivity extends AppCompatActivity {
                 showErrorAlert("Error", "Es gab einen Fehler beim Zugriff auf die Taschenlampe.");
             }
         }
-
         batteryButton = findViewById(R.id.batteryButton);
         lightPatternButton = findViewById(R.id.lightPatternButton);
         settingsButton = findViewById(R.id.settingsButton);
@@ -76,37 +108,6 @@ public class MainActivity extends AppCompatActivity {
         helligkeitSlider = findViewById(R.id.helligkeitSlider);
         helligkeitSlider.setProgress(helligkeit);
         helligkeitSlider.setMin(1);
-        try {
-            if (CameraManager.getCameraCharacteristics(cameraId).get(CameraCharacteristics.FLASH_INFO_STRENGTH_MAXIMUM_LEVEL) > 1) {
-                hatHelligkeitsregelung = true;
-                helligkeitSlider.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
-                    @Override
-                    public void onProgressChanged(SeekBar seekBar, int helligkeit, boolean fromUser) {
-                        MainActivity.this.helligkeit = helligkeit;
-                    }
-
-                    @Override
-                    public void onStartTrackingTouch(SeekBar seekBar) {
-                        return;
-                    }
-
-                    @Override
-                    public void onStopTrackingTouch(SeekBar seekBar) {
-                        return;
-                    }
-                });
-            }
-            else {
-                helligkeitSlider.setEnabled(false);
-                AlertDialog alert = new AlertDialog.Builder(MainActivity.this).create();
-                alert.setTitle("Hinweis");
-                alert.setMessage("Ihr Gerät unterstützt keine Helligkeitsregelung der Taschenlampe.");
-                alert.setButton(AlertDialog.BUTTON_POSITIVE, "OK", (dialog, which) -> dialog.dismiss());
-                alert.show();
-            }
-        } catch (CameraAccessException e) {
-            showErrorAlert("Error", "Es gab einen Fehler beim Zugriff auf die Taschenlampe.");
-        }
         akkuTextView = findViewById(R.id.akkuTextView);
         sosButton = findViewById(R.id.sosButton);
         akkuReceiver = new BroadcastReceiver() {
@@ -138,6 +139,7 @@ public class MainActivity extends AppCompatActivity {
 
     private void sendSOS() {
         powerButton.setEnabled(false);
+        sosButton.setEnabled(false);
         new Thread(() -> {
             try {
                 // SOS in Morse code ist -> ...---...
@@ -157,6 +159,7 @@ public class MainActivity extends AppCompatActivity {
                 Thread.currentThread().interrupt();
             }
             runOnUiThread(() -> powerButton.setEnabled(true));
+            runOnUiThread(() -> sosButton.setEnabled(true));
         }).start();
     }
 
