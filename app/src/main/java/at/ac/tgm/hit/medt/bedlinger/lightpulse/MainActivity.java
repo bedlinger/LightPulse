@@ -40,6 +40,8 @@ public class MainActivity extends AppCompatActivity {
                 taschenlampeOn();
             }
         });
+
+        sosButton.setOnClickListener(v -> sendSOS());
     }
 
     private void init() {
@@ -64,6 +66,29 @@ public class MainActivity extends AppCompatActivity {
                 showErrorAlert("Error", "Es gab einen Fehler beim Zugriff auf die Taschenlampe.");
             }
         }
+    }
+
+    private void sendSOS() {
+        new Thread(() -> {
+            try {
+                // SOS in Morse code ist -> ...---...
+                int[] pattern = {200, 500, 200, 500, 200, 500, 600, 500, 600, 500, 600, 500, 200, 500, 200, 500, 200, 500};
+                for (int time : pattern) {
+                    if (isTaschenlampeOn) {
+                        taschenlampeOff();
+                    } else {
+                        taschenlampeOn();
+                    }
+                    Thread.sleep(time);
+                }
+                // Ensure the flashlight is off at the end
+                if (isTaschenlampeOn) {
+                    taschenlampeOff();
+                }
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
+            }
+        }).start();
     }
 
     private void taschenlampeOn() {
