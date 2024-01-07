@@ -9,6 +9,10 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.PackageManager;
+import android.hardware.Sensor;
+import android.hardware.SensorEvent;
+import android.hardware.SensorEventListener;
+import android.hardware.SensorManager;
 import android.hardware.camera2.CameraAccessException;
 import android.hardware.camera2.CameraCharacteristics;
 import android.hardware.camera2.CameraManager;
@@ -18,8 +22,12 @@ import android.widget.Button;
 import android.widget.ImageButton;
 import android.widget.SeekBar;
 import android.widget.TextView;
+import android.widget.Toast;
 
-public class MainActivity extends AppCompatActivity {
+public class MainActivity extends AppCompatActivity implements SensorEventListener {
+
+    private static final int SHAKE_THRESHOLD_SOS = 80;
+    private static final int SHAKE_THRESHOLD_POWER_OFF = 10;
 
     private ImageButton batteryButton;
     private ImageButton lightPatternButton;
@@ -34,6 +42,11 @@ public class MainActivity extends AppCompatActivity {
     private boolean hatHelligkeitsregelung = false;
     private int helligkeit = 100;
     private BroadcastReceiver akkuReceiver;
+    private boolean hasAccelerometer;
+    private boolean checkForSOS = true;
+    private boolean powerOnShake = false;
+    private SensorManager sensorManager;
+    private long lastUpdate;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -50,7 +63,7 @@ public class MainActivity extends AppCompatActivity {
                     public void onProgressChanged(SeekBar seekBar, int helligkeit, boolean fromUser) {
                         MainActivity.this.helligkeit = helligkeit;
                         if (isTaschenlampeOn) {
-                            taschenlampeOn(helligkeit);
+                            taschenlampeOn(MainActivity.this.helligkeit);
                         }
                     }
 
@@ -116,6 +129,8 @@ public class MainActivity extends AppCompatActivity {
                 checkBatteryStatus(intent);
             }
         };
+        sensorManager = (SensorManager) getSystemService(Context.SENSOR_SERVICE);
+        hasAccelerometer = sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER) != null;
     }
 
     public void checkBatteryStatus(Intent intent) {
@@ -196,6 +211,31 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
+    private void checkOnShake(float x, float y, float z) {
+        long curTime = System.currentTimeMillis();
+        if ((curTime - lastUpdate) > 100) {
+            lastUpdate = curTime;
+
+            double acceleration = Math.sqrt(Math.pow(x, 2) + Math.pow(y, 2) + Math.pow(z, 2)) - SensorManager.GRAVITY_EARTH;
+
+            if (checkForSOS) {
+                if (acceleration > SHAKE_THRESHOLD_SOS) {
+                    sendSOS();
+                }
+            }
+            if (powerOnShake) {
+                if (acceleration > SHAKE_THRESHOLD_POWER_OFF) {
+                    if (isTaschenlampeOn) {
+                        taschenlampeOff();
+                    }
+                    else {
+                        taschenlampeOn(helligkeit);
+                    }
+                }
+            }
+        }
+    }
+
     private void showErrorAlert(String title, String message) {
         if (title == null || title.trim().equals("") || title.isEmpty()) {
             title = "Error";
@@ -214,11 +254,29 @@ public class MainActivity extends AppCompatActivity {
     protected void onResume() {
         super.onResume();
         registerReceiver(akkuReceiver, new IntentFilter(Intent.ACTION_BATTERY_CHANGED));
+        if (hasAccelerometer) {
+            sensorManager.registerListener(this, sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER), SensorManager.SENSOR_DELAY_NORMAL);
+        }
     }
 
     @Override
     protected void onPause() {
         super.onPause();
         unregisterReceiver(akkuReceiver);
+        if (hasAccelerometer) {
+            sensorManager.unregisterListener(this);
+        }
+    }
+
+    @Override
+    public void onSensorChanged(SensorEvent event) {
+        if (hasAccelerometer) {
+            checkOnShake(event.values[0], event.values[1], event.values[2]);
+        }
+    }
+
+    @Override
+    public void onAccuracyChanged(Sensor sensor, int accuracy) {
+
     }
 }
