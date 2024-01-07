@@ -11,10 +11,119 @@
         android:layout_width="230dp"
         android:layout_height="230dp"
         android:background="@drawable/round_button"
-        android:contentDescription="@string/power_on_icon"
+        android:contentDescription="Taschenlampe aktivieren/deaktivieren"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        app:srcCompat="@drawable/ic_power_200dp" />
+        app:layout_constraintVertical_bias="0.39"
+        app:srcCompat="@drawable/ic_power" />
+
+    <ImageButton
+        android:id="@+id/batteryButton"
+        android:layout_width="80dp"
+        android:layout_height="80dp"
+        android:background="@drawable/round_button"
+        android:contentDescription="Stromverbrauch ansehen"
+        app:layout_constraintBottom_toBottomOf="@+id/lightPatternButton"
+        app:layout_constraintEnd_toStartOf="@+id/lightPatternButton"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="@+id/lightPatternButton"
+        app:srcCompat="@drawable/ic_battery" />
+
+    <ImageButton
+        android:id="@+id/lightPatternButton"
+        android:layout_width="80dp"
+        android:layout_height="80dp"
+        android:background="@drawable/round_button"
+        android:contentDescription="Lichtmuster erstellen"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="0.01999998"
+        app:srcCompat="@drawable/ic_lightshow" />
+
+    <ImageButton
+        android:id="@+id/settingsButton"
+        android:layout_width="80dp"
+        android:layout_height="80dp"
+        android:background="@drawable/round_button"
+        android:contentDescription="Einstellungen öffnen"
+        app:layout_constraintBottom_toBottomOf="@+id/lightPatternButton"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toEndOf="@+id/lightPatternButton"
+        app:layout_constraintTop_toTopOf="@+id/lightPatternButton"
+        app:srcCompat="@drawable/ic_settings" />
+
+    <TextView
+        android:id="@+id/TextView1"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="16dp"
+        android:text="Helligkeitsstufe:"
+        android:textAlignment="center"
+        android:textSize="20sp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="@+id/powerButton"
+        app:layout_constraintStart_toStartOf="@+id/powerButton"
+        app:layout_constraintTop_toBottomOf="@+id/powerButton"
+        app:layout_constraintVertical_bias="0.0" />
+
+    <SeekBar
+        android:id="@+id/helligkeitSlider"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        android:progressTint="#FDD835"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="@+id/TextView1"
+        app:layout_constraintStart_toStartOf="@+id/TextView1"
+        app:layout_constraintTop_toBottomOf="@+id/TextView1"
+        app:layout_constraintVertical_bias="0.0" />
+
+    <TextView
+        android:id="@+id/TextView2"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="11dp"
+        android:text="verbleibende Akkulaufzeit:"
+        android:textAlignment="center"
+        android:textSize="20sp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="@+id/helligkeitSlider"
+        app:layout_constraintStart_toStartOf="@+id/helligkeitSlider"
+        app:layout_constraintTop_toBottomOf="@+id/helligkeitSlider"
+        app:layout_constraintVertical_bias="0.0" />
+
+    <TextView
+        android:id="@+id/akkulaufzeitTextView"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        android:text="x Stunden"
+        android:textSize="16sp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="@+id/TextView2"
+        app:layout_constraintStart_toStartOf="@+id/TextView2"
+        app:layout_constraintTop_toBottomOf="@+id/TextView2"
+        app:layout_constraintVertical_bias="0.0" />
+
+    <Button
+        android:id="@+id/sosButton"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="8dp"
+        android:backgroundTint="#FF0000"
+        android:text="sos"
+        android:textAlignment="center"
+        android:textAllCaps="true"
+        android:textColor="#FFFFFF"
+        android:textSize="24sp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/akkulaufzeitTextView"
+        app:layout_constraintVertical_bias="1.0" />
+
 </androidx.constraintlayout.widget.ConstraintLayout>
