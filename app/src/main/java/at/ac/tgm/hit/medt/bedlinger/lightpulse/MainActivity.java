@@ -2,10 +2,16 @@ package at.ac.tgm.hit.medt.bedlinger.lightpulse;
 
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.content.ContextCompat;
 
+import android.content.BroadcastReceiver;
+import android.content.Context;
+import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.pm.PackageManager;
 import android.hardware.camera2.CameraAccessException;
 import android.hardware.camera2.CameraManager;
+import android.os.BatteryManager;
 import android.os.Bundle;
 import android.widget.Button;
 import android.widget.ImageButton;
@@ -19,11 +25,12 @@ public class MainActivity extends AppCompatActivity {
     private ImageButton settingsButton;
     private ImageButton powerButton;
     private SeekBar helligkeitSlider;
-    private TextView akkulaufzeitTextView;
+    private TextView akkuTextView;
     private Button sosButton;
     private CameraManager CameraManager;
     private String cameraId;
     private boolean isTaschenlampeOn = false;
+    private BroadcastReceiver akkuReceiver;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -45,14 +52,6 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void init() {
-        batteryButton = findViewById(R.id.batteryButton);
-        lightPatternButton = findViewById(R.id.lightPatternButton);
-        settingsButton = findViewById(R.id.settingsButton);
-        powerButton = findViewById(R.id.powerButton);
-        helligkeitSlider = findViewById(R.id.helligkeitSlider);
-        akkulaufzeitTextView = findViewById(R.id.akkulaufzeitTextView);
-        sosButton = findViewById(R.id.sosButton);
-
         // überprüfen ob Taschenlampe verfügbar ist und ggf. Fehlermeldung anzeigen
         boolean isFlashAvailable = getApplicationContext().getPackageManager().hasSystemFeature(PackageManager.FEATURE_CAMERA_FLASH);
         if (!isFlashAvailable) {
@@ -66,6 +65,39 @@ public class MainActivity extends AppCompatActivity {
                 showErrorAlert("Error", "Es gab einen Fehler beim Zugriff auf die Taschenlampe.");
             }
         }
+
+        batteryButton = findViewById(R.id.batteryButton);
+        lightPatternButton = findViewById(R.id.lightPatternButton);
+        settingsButton = findViewById(R.id.settingsButton);
+        powerButton = findViewById(R.id.powerButton);
+        helligkeitSlider = findViewById(R.id.helligkeitSlider);
+        akkuTextView = findViewById(R.id.akkuTextView);
+        sosButton = findViewById(R.id.sosButton);
+        akkuReceiver = new BroadcastReceiver() {
+            @Override
+            public void onReceive(Context context, Intent intent) {
+                checkBatteryStatus(intent);
+            }
+        };
+    }
+
+    public void checkBatteryStatus(Intent intent) {
+        int level = intent.getIntExtra(BatteryManager.EXTRA_LEVEL, -1);
+        int scale = intent.getIntExtra(BatteryManager.EXTRA_SCALE, -1);
+
+        int batteryPct = Math.round(level / (float)scale * 100);
+
+        if (batteryPct <= 20) {
+            akkuTextView.setTextColor(ContextCompat.getColor(this, R.color.batteryPctLow));
+        }
+        if (batteryPct > 20 && batteryPct <= 50) {
+            akkuTextView.setTextColor(ContextCompat.getColor(this, R.color.batteryPctMedium));
+        }
+        if (batteryPct > 50) {
+            akkuTextView.setTextColor(ContextCompat.getColor(this, R.color.batteryPctHigh));
+        }
+
+        akkuTextView.setText(batteryPct + "%");
     }
 
     private void sendSOS() {
@@ -121,5 +153,17 @@ public class MainActivity extends AppCompatActivity {
         alert.setMessage(message);
         alert.setButton(AlertDialog.BUTTON_POSITIVE, "OK", (dialog, which) -> finish());
         alert.show();
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        registerReceiver(akkuReceiver, new IntentFilter(Intent.ACTION_BATTERY_CHANGED));
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        unregisterReceiver(akkuReceiver);
     }
 }
