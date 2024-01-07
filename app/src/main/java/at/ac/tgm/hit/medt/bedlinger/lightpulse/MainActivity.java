@@ -10,6 +10,7 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.PackageManager;
 import android.hardware.camera2.CameraAccessException;
+import android.hardware.camera2.CameraCharacteristics;
 import android.hardware.camera2.CameraManager;
 import android.os.BatteryManager;
 import android.os.Bundle;
@@ -30,6 +31,8 @@ public class MainActivity extends AppCompatActivity {
     private CameraManager CameraManager;
     private String cameraId;
     private boolean isTaschenlampeOn = false;
+    private boolean hatHelligkeitsregelung = false;
+    private int helligkeit = 100;
     private BroadcastReceiver akkuReceiver;
 
     @Override
@@ -44,7 +47,7 @@ public class MainActivity extends AppCompatActivity {
                 taschenlampeOff();
             }
             else {
-                taschenlampeOn();
+                taschenlampeOn(helligkeit);
             }
         });
 
@@ -71,6 +74,39 @@ public class MainActivity extends AppCompatActivity {
         settingsButton = findViewById(R.id.settingsButton);
         powerButton = findViewById(R.id.powerButton);
         helligkeitSlider = findViewById(R.id.helligkeitSlider);
+        helligkeitSlider.setProgress(helligkeit);
+        helligkeitSlider.setMin(1);
+        try {
+            if (CameraManager.getCameraCharacteristics(cameraId).get(CameraCharacteristics.FLASH_INFO_STRENGTH_MAXIMUM_LEVEL) > 1) {
+                hatHelligkeitsregelung = true;
+                helligkeitSlider.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
+                    @Override
+                    public void onProgressChanged(SeekBar seekBar, int helligkeit, boolean fromUser) {
+                        MainActivity.this.helligkeit = helligkeit;
+                    }
+
+                    @Override
+                    public void onStartTrackingTouch(SeekBar seekBar) {
+                        return;
+                    }
+
+                    @Override
+                    public void onStopTrackingTouch(SeekBar seekBar) {
+                        return;
+                    }
+                });
+            }
+            else {
+                helligkeitSlider.setEnabled(false);
+                AlertDialog alert = new AlertDialog.Builder(MainActivity.this).create();
+                alert.setTitle("Hinweis");
+                alert.setMessage("Ihr Gerät unterstützt keine Helligkeitsregelung der Taschenlampe.");
+                alert.setButton(AlertDialog.BUTTON_POSITIVE, "OK", (dialog, which) -> dialog.dismiss());
+                alert.show();
+            }
+        } catch (CameraAccessException e) {
+            showErrorAlert("Error", "Es gab einen Fehler beim Zugriff auf die Taschenlampe.");
+        }
         akkuTextView = findViewById(R.id.akkuTextView);
         sosButton = findViewById(R.id.sosButton);
         akkuReceiver = new BroadcastReceiver() {
@@ -122,6 +158,21 @@ public class MainActivity extends AppCompatActivity {
             }
             runOnUiThread(() -> powerButton.setEnabled(true));
         }).start();
+    }
+
+    private void taschenlampeOn(int helligkeit) {
+        try {
+            if (hatHelligkeitsregelung) {
+                int maxHelligkeit = CameraManager.getCameraCharacteristics(cameraId).get(CameraCharacteristics.FLASH_INFO_STRENGTH_MAXIMUM_LEVEL);
+                int mappedHelligkeit = (helligkeit * maxHelligkeit) / 100;
+                CameraManager.turnOnTorchWithStrengthLevel(cameraId, mappedHelligkeit);
+            }
+            else {
+                taschenlampeOn();
+            }
+        } catch (CameraAccessException e) {
+            showErrorAlert("Error", "Es gab einen Fehler beim Zugriff auf die Taschenlampe.");
+        }
     }
 
     private void taschenlampeOn() {
