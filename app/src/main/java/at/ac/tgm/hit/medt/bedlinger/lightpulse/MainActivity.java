@@ -1,7 +1,11 @@
 package at.ac.tgm.hit.medt.bedlinger.lightpulse;
 
+import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 
+import android.content.pm.PackageManager;
+import android.hardware.camera2.CameraAccessException;
+import android.hardware.camera2.CameraManager;
 import android.os.Bundle;
 import android.widget.Button;
 import android.widget.ImageButton;
@@ -17,6 +21,9 @@ public class MainActivity extends AppCompatActivity {
     private SeekBar helligkeitSlider;
     private TextView akkulaufzeitTextView;
     private Button sosButton;
+    private CameraManager CameraManager;
+    private String cameraId;
+    private boolean isTaschenlampeOn = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -24,15 +31,69 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
 
         this.init();
+
+        powerButton.setOnClickListener(v -> {
+            if (isTaschenlampeOn) {
+                taschenlampeOff();
+            }
+            else {
+                taschenlampeOn();
+            }
+        });
     }
 
     private void init() {
-        this.batteryButton = findViewById(R.id.batteryButton);
-        this.lightPatternButton = findViewById(R.id.lightPatternButton);
-        this.settingsButton = findViewById(R.id.settingsButton);
-        this.powerButton = findViewById(R.id.powerButton);
-        this.helligkeitSlider = findViewById(R.id.helligkeitSlider);
-        this.akkulaufzeitTextView = findViewById(R.id.akkulaufzeitTextView);
-        this.sosButton = findViewById(R.id.sosButton);
+        batteryButton = findViewById(R.id.batteryButton);
+        lightPatternButton = findViewById(R.id.lightPatternButton);
+        settingsButton = findViewById(R.id.settingsButton);
+        powerButton = findViewById(R.id.powerButton);
+        helligkeitSlider = findViewById(R.id.helligkeitSlider);
+        akkulaufzeitTextView = findViewById(R.id.akkulaufzeitTextView);
+        sosButton = findViewById(R.id.sosButton);
+
+        // überprüfen ob Taschenlampe verfügbar ist und ggf. Fehlermeldung anzeigen
+        boolean isFlashAvailable = getApplicationContext().getPackageManager().hasSystemFeature(PackageManager.FEATURE_CAMERA_FLASH);
+        if (!isFlashAvailable) {
+            showErrorAlert("Error", "Ihr Gerät unterstützt keine Taschenlampe.");
+        }
+        else {
+            CameraManager = (CameraManager) getSystemService(CAMERA_SERVICE);
+            try {
+                cameraId = CameraManager.getCameraIdList()[0];
+            } catch (Exception e) {
+                showErrorAlert("Error", "Es gab einen Fehler beim Zugriff auf die Taschenlampe.");
+            }
+        }
+    }
+
+    private void taschenlampeOn() {
+        try {
+            CameraManager.setTorchMode(cameraId, true);
+            isTaschenlampeOn = true;
+        } catch (CameraAccessException e) {
+            showErrorAlert("Error", "Es gab einen Fehler beim Zugriff auf die Taschenlampe.");
+        }
+    }
+
+    private void taschenlampeOff() {
+        try {
+            CameraManager.setTorchMode(cameraId, false);
+            isTaschenlampeOn = false;
+        } catch (CameraAccessException e) {
+            showErrorAlert("Error", "Es gab einen Fehler beim Zugriff auf die Taschenlampe.");
+        }
+    }
+
+    private void showErrorAlert(String title, String message) {
+        if (title == null || title.trim().equals("") || title.isEmpty()) {
+            title = "Error";
+        }
+        if (message == null || message.trim().equals("") || message.isEmpty()) {
+            message = "Es gab einen Fehler.";
+        }
+        AlertDialog alert = new AlertDialog.Builder(MainActivity.this).create();
+        alert.setTitle(title);
+        alert.setMessage(message);
+        alert.setButton(AlertDialog.BUTTON_POSITIVE, "OK", (dialog, which) -> finish());
     }
 }
