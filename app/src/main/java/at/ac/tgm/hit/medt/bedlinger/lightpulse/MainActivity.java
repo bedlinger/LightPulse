@@ -120,6 +120,7 @@ public class MainActivity extends AppCompatActivity {
             } catch (InterruptedException e) {
                 Thread.currentThread().interrupt();
             }
+            runOnUiThread(() -> powerButton.setEnabled(true));
         }).start();
     }
 

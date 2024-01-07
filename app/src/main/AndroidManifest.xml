@@ -23,8 +23,6 @@
                 <action android:name="android.intent.action.MAIN" />
 
                 <category android:name="android.intent.category.LAUNCHER" />
-
-                <action android:name="android.intent.action.ACTION_BATTERY_CHANGED" />
             </intent-filter>
         </activity>
     </application>
