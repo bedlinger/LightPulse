@@ -43,9 +43,14 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
     private BroadcastReceiver akkuReceiver;
     private boolean hasAccelerometer;
     private final boolean checkForSOS = false;
-    private final boolean powerOnShake = true;
+    private final boolean powerOnShake = false;
     private SensorManager sensorManager;
     private long lastUpdate;
+
+    private Sensor proximitySensor;
+    private boolean isInPocket = false;
+    private boolean hasProximitySensor;
+    private static final int PROXIMITY_THRESHOLD = 1;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -127,6 +132,12 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
         };
         sensorManager = (SensorManager) getSystemService(Context.SENSOR_SERVICE);
         hasAccelerometer = sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER) != null;
+        hasProximitySensor = sensorManager.getDefaultSensor(Sensor.TYPE_PROXIMITY) != null;
+        if (hasProximitySensor) {
+            proximitySensor = sensorManager.getDefaultSensor(Sensor.TYPE_PROXIMITY);
+        } else {
+            showErrorAlert("Error", "Ihr Gerät unterstützt keinen Näherungssensor.");
+        }
     }
 
     public void checkBatteryStatus(Intent intent) {
@@ -251,6 +262,9 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
         if (hasAccelerometer) {
             sensorManager.registerListener(this, sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER), SensorManager.SENSOR_DELAY_NORMAL);
         }
+        if (hasProximitySensor) {
+            sensorManager.registerListener(this, proximitySensor, SensorManager.SENSOR_DELAY_NORMAL);
+        }
     }
 
     @Override
@@ -260,12 +274,25 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
         if (hasAccelerometer) {
             sensorManager.unregisterListener(this);
         }
+        if (hasProximitySensor) {
+            sensorManager.unregisterListener(this);
+        }
     }
 
     @Override
     public void onSensorChanged(SensorEvent event) {
-        if (hasAccelerometer) {
+        if (hasAccelerometer && event.sensor.getType() == Sensor.TYPE_ACCELEROMETER) {
             checkOnShake(event.values[0], event.values[1], event.values[2]);
+        }
+        if (hasProximitySensor && event.sensor.getType() == Sensor.TYPE_PROXIMITY) {
+            if (event.values[0] < proximitySensor.getMaximumRange()) {
+                isInPocket = true;
+                if (isTaschenlampeOn) {
+                    taschenlampeOff();
+                }
+            } else {
+                isInPocket = false;
+            }
         }
     }
 
