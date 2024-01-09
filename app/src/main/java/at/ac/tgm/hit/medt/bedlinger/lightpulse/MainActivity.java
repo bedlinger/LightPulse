@@ -28,29 +28,21 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
     private static final int SHAKE_THRESHOLD_SOS = 80;
     private static final int SHAKE_THRESHOLD_POWER_OFF = 10;
 
-    private ImageButton batteryButton;
-    private ImageButton lightPatternButton;
-    private ImageButton settingsButton;
-    private ImageButton powerButton;
-    private SeekBar helligkeitSlider;
+    private ImageButton batteryButton, lightPatternButton, settingsButton, powerButton;
+    private SeekBar brightnessSlider;
     private TextView akkuTextView;
     private Button sosButton;
-    private CameraManager CameraManager;
+    private CameraManager cameraManager;
     private String cameraId;
-    private boolean isTaschenlampeOn = false;
-    private boolean hatHelligkeitsregelung = false;
-    private int helligkeit = 100;
-    private BroadcastReceiver akkuReceiver;
-    private boolean hasAccelerometer;
-    private final boolean checkForSOS = false;
-    private final boolean powerOnShake = false;
-    private SensorManager sensorManager;
     private long lastUpdate;
-
+    private final boolean checkForSOS = false, powerOnShake = true;
+    private boolean isTaschenlampeOn = false;
+    private boolean hasBrightnessControl, hasAccelerometer;
+    private int brightness = 100;
+    private BroadcastReceiver akkuReceiver;
+    private SensorManager sensorManager;
     private Sensor proximitySensor;
-    private boolean isInPocket = false;
     private boolean hasProximitySensor;
-    private static final int PROXIMITY_THRESHOLD = 1;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -60,14 +52,14 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
         this.init();
 
         try {
-            if (CameraManager.getCameraCharacteristics(cameraId).get(CameraCharacteristics.FLASH_INFO_STRENGTH_MAXIMUM_LEVEL) > 1) {
-                hatHelligkeitsregelung = true;
-                helligkeitSlider.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
+            if (cameraManager.getCameraCharacteristics(cameraId).get(CameraCharacteristics.FLASH_INFO_STRENGTH_MAXIMUM_LEVEL) > 1) {
+                hasBrightnessControl = true;
+                brightnessSlider.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
                     @Override
                     public void onProgressChanged(SeekBar seekBar, int helligkeit, boolean fromUser) {
-                        MainActivity.this.helligkeit = helligkeit;
+                        MainActivity.this.brightness = helligkeit;
                         if (isTaschenlampeOn) {
-                            taschenlampeOn(MainActivity.this.helligkeit);
+                            taschenlampeOn();
                         }
                     }
 
@@ -80,22 +72,18 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
                     }
                 });
             } else {
-                helligkeitSlider.setEnabled(false);
-                AlertDialog alert = new AlertDialog.Builder(MainActivity.this).create();
-                alert.setTitle("Hinweis");
-                alert.setMessage("Ihr Gerät unterstützt keine Helligkeitsregelung der Taschenlampe.");
-                alert.setButton(AlertDialog.BUTTON_POSITIVE, "OK", (dialog, which) -> dialog.dismiss());
-                alert.show();
+                brightnessSlider.setEnabled(false);
+                showHintAlert("Ihr Gerät unterstützt keine Helligkeitsregelung der Taschenlampe.");
             }
         } catch (CameraAccessException e) {
-            showErrorAlert("Error", "Es gab einen Fehler beim Zugriff auf die Taschenlampe.");
+            showErrorAlert("Es gab einen Fehler beim Zugriff auf die Taschenlampe.");
         }
 
         powerButton.setOnClickListener(v -> {
             if (isTaschenlampeOn) {
                 taschenlampeOff();
             } else {
-                taschenlampeOn(helligkeit);
+                taschenlampeOn();
             }
         });
 
@@ -103,25 +91,24 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
     }
 
     private void init() {
-        // überprüfen ob Taschenlampe verfügbar ist und ggf. Fehlermeldung anzeigen
         boolean isFlashAvailable = getApplicationContext().getPackageManager().hasSystemFeature(PackageManager.FEATURE_CAMERA_FLASH);
         if (!isFlashAvailable) {
-            showErrorAlert("Error", "Ihr Gerät unterstützt keine Taschenlampe.");
+            showErrorAlert("Ihr Gerät unterstützt keine Taschenlampe.");
         } else {
-            CameraManager = (CameraManager) getSystemService(CAMERA_SERVICE);
+            cameraManager = (CameraManager) getSystemService(CAMERA_SERVICE);
             try {
-                cameraId = CameraManager.getCameraIdList()[0];
+                cameraId = cameraManager.getCameraIdList()[0];
             } catch (Exception e) {
-                showErrorAlert("Error", "Es gab einen Fehler beim Zugriff auf die Taschenlampe.");
+                showErrorAlert("Es gab einen Fehler beim Zugriff auf die Taschenlampe.");
             }
         }
         batteryButton = findViewById(R.id.batteryButton);
         lightPatternButton = findViewById(R.id.lightPatternButton);
         settingsButton = findViewById(R.id.settingsButton);
         powerButton = findViewById(R.id.powerButton);
-        helligkeitSlider = findViewById(R.id.helligkeitSlider);
-        helligkeitSlider.setProgress(helligkeit);
-        helligkeitSlider.setMin(1);
+        brightnessSlider = findViewById(R.id.helligkeitSlider);
+        brightnessSlider.setProgress(brightness);
+        brightnessSlider.setMin(1);
         akkuTextView = findViewById(R.id.akkuTextView);
         sosButton = findViewById(R.id.sosButton);
         akkuReceiver = new BroadcastReceiver() {
@@ -136,7 +123,31 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
         if (hasProximitySensor) {
             proximitySensor = sensorManager.getDefaultSensor(Sensor.TYPE_PROXIMITY);
         } else {
-            showErrorAlert("Error", "Ihr Gerät unterstützt keinen Näherungssensor.");
+            showErrorAlert("Ihr Gerät unterstützt keinen Näherungssensor.");
+        }
+    }
+
+    private void taschenlampeOn() {
+        try {
+            if (hasBrightnessControl) {
+                int maxBrightness = cameraManager.getCameraCharacteristics(cameraId).get(CameraCharacteristics.FLASH_INFO_STRENGTH_MAXIMUM_LEVEL);
+                int mappedBrightness = (brightness * maxBrightness) / 100;
+                cameraManager.turnOnTorchWithStrengthLevel(cameraId, mappedBrightness);
+            } else {
+                cameraManager.setTorchMode(cameraId, true);
+            }
+            isTaschenlampeOn = true;
+        } catch (CameraAccessException e) {
+            showErrorAlert("Es gab einen Fehler beim Zugriff auf die Taschenlampe.");
+        }
+    }
+
+    private void taschenlampeOff() {
+        try {
+            cameraManager.setTorchMode(cameraId, false);
+            isTaschenlampeOn = false;
+        } catch (CameraAccessException e) {
+            showErrorAlert("Es gab einen Fehler beim Zugriff auf die Taschenlampe.");
         }
     }
 
@@ -185,38 +196,6 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
         }).start();
     }
 
-    private void taschenlampeOn(int helligkeit) {
-        try {
-            if (hatHelligkeitsregelung) {
-                int maxHelligkeit = CameraManager.getCameraCharacteristics(cameraId).get(CameraCharacteristics.FLASH_INFO_STRENGTH_MAXIMUM_LEVEL);
-                int mappedHelligkeit = (helligkeit * maxHelligkeit) / 100;
-                CameraManager.turnOnTorchWithStrengthLevel(cameraId, mappedHelligkeit);
-            } else {
-                taschenlampeOn();
-            }
-        } catch (CameraAccessException e) {
-            showErrorAlert("Error", "Es gab einen Fehler beim Zugriff auf die Taschenlampe.");
-        }
-    }
-
-    private void taschenlampeOn() {
-        try {
-            CameraManager.setTorchMode(cameraId, true);
-            isTaschenlampeOn = true;
-        } catch (CameraAccessException e) {
-            showErrorAlert("Error", "Es gab einen Fehler beim Zugriff auf die Taschenlampe.");
-        }
-    }
-
-    private void taschenlampeOff() {
-        try {
-            CameraManager.setTorchMode(cameraId, false);
-            isTaschenlampeOn = false;
-        } catch (CameraAccessException e) {
-            showErrorAlert("Error", "Es gab einen Fehler beim Zugriff auf die Taschenlampe.");
-        }
-    }
-
     private void checkOnShake(float x, float y, float z) {
         long curTime = System.currentTimeMillis();
         if ((curTime - lastUpdate) > 100) {
@@ -224,35 +203,29 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
 
             double acceleration = Math.sqrt(Math.pow(x, 2) + Math.pow(y, 2) + Math.pow(z, 2)) - SensorManager.GRAVITY_EARTH;
 
-            if (checkForSOS) {
-                if (acceleration > SHAKE_THRESHOLD_SOS) {
-                    sendSOS();
-                }
+            if (checkForSOS && acceleration > SHAKE_THRESHOLD_SOS) {
+                sendSOS();
             }
-            if (powerOnShake) {
-                if (acceleration > SHAKE_THRESHOLD_POWER_OFF) {
-                    if (isTaschenlampeOn) {
-                        taschenlampeOff();
-                    } else {
-                        taschenlampeOn(helligkeit);
-                    }
+            if (powerOnShake && acceleration > SHAKE_THRESHOLD_POWER_OFF) {
+                if (isTaschenlampeOn) {
+                    taschenlampeOff();
+                } else {
+                    taschenlampeOn();
                 }
             }
         }
     }
 
-    private void showErrorAlert(String title, String message) {
-        if (title == null || title.trim().equals("") || title.isEmpty()) {
-            title = "Error";
+    @Override
+    public void onSensorChanged(SensorEvent event) {
+        if (hasAccelerometer && event.sensor.getType() == Sensor.TYPE_ACCELEROMETER) {
+            checkOnShake(event.values[0], event.values[1], event.values[2]);
         }
-        if (message == null || message.trim().equals("") || message.isEmpty()) {
-            message = "Es gab einen Fehler.";
+        if (hasProximitySensor && event.sensor.getType() == Sensor.TYPE_PROXIMITY && event.values[0] < proximitySensor.getMaximumRange()) {
+            if (isTaschenlampeOn) {
+                taschenlampeOff();
+            }
         }
-        AlertDialog alert = new AlertDialog.Builder(MainActivity.this).create();
-        alert.setTitle(title);
-        alert.setMessage(message);
-        alert.setButton(AlertDialog.BUTTON_POSITIVE, "OK", (dialog, which) -> finish());
-        alert.show();
     }
 
     @Override
@@ -279,21 +252,28 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
         }
     }
 
-    @Override
-    public void onSensorChanged(SensorEvent event) {
-        if (hasAccelerometer && event.sensor.getType() == Sensor.TYPE_ACCELEROMETER) {
-            checkOnShake(event.values[0], event.values[1], event.values[2]);
+    private void showErrorAlert(String message) {
+        String title = "Error";
+        if (message == null || message.trim().equals("") || message.isEmpty()) {
+            message = "Es gab einen Fehler.";
         }
-        if (hasProximitySensor && event.sensor.getType() == Sensor.TYPE_PROXIMITY) {
-            if (event.values[0] < proximitySensor.getMaximumRange()) {
-                isInPocket = true;
-                if (isTaschenlampeOn) {
-                    taschenlampeOff();
-                }
-            } else {
-                isInPocket = false;
-            }
+        AlertDialog alert = new AlertDialog.Builder(MainActivity.this).create();
+        alert.setTitle(title);
+        alert.setMessage(message);
+        alert.setButton(AlertDialog.BUTTON_POSITIVE, "OK", (dialog, which) -> finish());
+        alert.show();
+    }
+
+    private void showHintAlert(String message) {
+        String title = "Hinweis";
+        if (message == null || message.trim().equals("") || message.isEmpty()) {
+            message = "Es gab einen Fehler.";
         }
+        AlertDialog alert = new AlertDialog.Builder(MainActivity.this).create();
+        alert.setTitle(title);
+        alert.setMessage(message);
+        alert.setButton(AlertDialog.BUTTON_POSITIVE, "OK", (dialog, which) -> dialog.dismiss());
+        alert.show();
     }
 
     @Override
