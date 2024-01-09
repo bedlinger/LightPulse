@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:android="http://schemas.android.com/apk/res/android">
+    <SwitchPreferenceCompat
+        android:key="auto_off"
+        android:title="Automatisches Abschalten"
+        app:defaultValue="true" />
+
+    <PreferenceCategory
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:title="Schüttel Erkennung">
+
+        <SwitchPreferenceCompat
+            android:key="sos_shake"
+            android:title="SOS erkennen bei Schütteln"
+            app:defaultValue="true" />
+        <SwitchPreferenceCompat
+            android:key="toggle_flashlight_shake"
+            android:title="Aktivieren/Deaktivieren bei Schütteln" />
+    </PreferenceCategory>
+    <PreferenceCategory
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content">
+
+    </PreferenceCategory>
+    <SwitchPreferenceCompat
+        android:key="power_saving_mode"
+        android:title="Energiesparmodus" />
+
+</PreferenceScreen>

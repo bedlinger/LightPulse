@@ -1,8 +1,10 @@
 <resources xmlns:tools="http://schemas.android.com/tools">
     <!-- Base application theme. -->
-    <style name="Base.Theme.LightPulse" parent="Theme.Material3.DayNight.NoActionBar">
+    <style name="Base.Theme.LightPulse" parent="Theme.Material3.DayNight">
         <!-- Customize your dark theme here. -->
         <item name="colorPrimary">@color/lightBlue</item>
+        <item name="colorSecondary">@color/mediumBlue</item>
+        <item name="colorAccent">@color/accentBlue</item>
     </style>
 
     <style name="Theme.LightPulse" parent="Base.Theme.LightPulse" />

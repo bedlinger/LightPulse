@@ -4,6 +4,7 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.hardware.Sensor;
 import android.hardware.SensorEvent;
@@ -22,6 +23,7 @@ import android.widget.TextView;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.content.ContextCompat;
+import androidx.preference.PreferenceManager;
 
 public class MainActivity extends AppCompatActivity implements SensorEventListener {
 
@@ -35,7 +37,7 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
     private CameraManager cameraManager;
     private String cameraId;
     private long lastUpdate;
-    private final boolean checkForSOS = false, powerOnShake = true;
+    private boolean checkForSOS, powerOnShake, automaticPowerOff;
     private boolean isTaschenlampeOn = false;
     private boolean hasBrightnessControl, hasAccelerometer;
     private int brightness = 100;
@@ -43,6 +45,7 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
     private SensorManager sensorManager;
     private Sensor proximitySensor;
     private boolean hasProximitySensor;
+    private SharedPreferences sharedPreferences;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -88,6 +91,14 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
         });
 
         sosButton.setOnClickListener(v -> sendSOS());
+
+        settingsButton.setOnClickListener(v -> {
+            if (isTaschenlampeOn) {
+                taschenlampeOff();
+            }
+            Intent intent = new Intent(MainActivity.this, SettingsActivity.class);
+            startActivity(intent);
+        });
     }
 
     private void init() {
@@ -125,6 +136,10 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
         } else {
             showErrorAlert("Ihr Gerät unterstützt keinen Näherungssensor.");
         }
+        sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
+        checkForSOS = sharedPreferences.getBoolean("sos_shake", false);
+        powerOnShake = sharedPreferences.getBoolean("toggle_flashlight_shake", true);
+        automaticPowerOff = sharedPreferences.getBoolean("auto_off", true);
     }
 
     private void taschenlampeOn() {
@@ -221,7 +236,7 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
         if (hasAccelerometer && event.sensor.getType() == Sensor.TYPE_ACCELEROMETER) {
             checkOnShake(event.values[0], event.values[1], event.values[2]);
         }
-        if (hasProximitySensor && event.sensor.getType() == Sensor.TYPE_PROXIMITY && event.values[0] < proximitySensor.getMaximumRange()) {
+        if (hasProximitySensor && automaticPowerOff && event.sensor.getType() == Sensor.TYPE_PROXIMITY && event.values[0] < proximitySensor.getMaximumRange()) {
             if (isTaschenlampeOn) {
                 taschenlampeOff();
             }
@@ -238,6 +253,17 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
         if (hasProximitySensor) {
             sensorManager.registerListener(this, proximitySensor, SensorManager.SENSOR_DELAY_NORMAL);
         }
+        sharedPreferences.registerOnSharedPreferenceChangeListener((sharedPreferences, key) -> {
+            if (key.equals("sos_shake")) {
+                checkForSOS = sharedPreferences.getBoolean("sos_shake", false);
+            }
+            if (key.equals("toggle_flashlight_shake")) {
+                powerOnShake = sharedPreferences.getBoolean("toggle_flashlight_shake", true);
+            }
+            if (key.equals("auto_off")) {
+                automaticPowerOff = sharedPreferences.getBoolean("auto_off", true);
+            }
+        });
     }
 
     @Override

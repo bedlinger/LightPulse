@@ -5,6 +5,7 @@
     <color name="lightBlue">#2BA7DF</color>
     <color name="mediumBlue">#1B98E0</color>
     <color name="darkBlue">#0F4C75</color>
+    <color name="accentBlue">#3282B8</color>
     <color name="batteryPctLow">#FF0000</color>
     <color name="batteryPctMedium">#FFA500</color>
     <color name="batteryPctHigh">#00FF00</color>
