@@ -25,6 +25,8 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.content.ContextCompat;
 import androidx.preference.PreferenceManager;
 
+import com.google.android.material.snackbar.Snackbar;
+
 public class MainActivity extends AppCompatActivity implements SensorEventListener {
 
     private static final int SHAKE_THRESHOLD_SOS = 80;
@@ -98,6 +100,22 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
             }
             Intent intent = new Intent(MainActivity.this, SettingsActivity.class);
             startActivity(intent);
+        });
+
+        lightPatternButton.setOnClickListener(v -> {
+            if (isTaschenlampeOn) {
+                taschenlampeOff();
+            }
+            Intent intent = new Intent(MainActivity.this, LightshowActivity.class);
+            intent.putExtra("hasIntensityControl", hasBrightnessControl);
+            startActivity(intent);
+        });
+
+        batteryButton.setOnClickListener(v -> {
+            if (isTaschenlampeOn) {
+                taschenlampeOff();
+            }
+            Snackbar.make(v, "Dieses Feature ist noch nicht implementiert.", Snackbar.LENGTH_LONG).show();
         });
     }
 
