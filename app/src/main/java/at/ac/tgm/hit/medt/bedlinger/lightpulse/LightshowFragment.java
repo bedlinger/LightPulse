@@ -83,9 +83,6 @@ public class LightshowFragment extends Fragment {
                 @Override
                 public void onStopTrackingTouch(SeekBar seekBar) {}
             });
-        } else {
-            intensitaet = 100;
-            intensitaetSlider.setProgress(100);
         }
 
         b1.setOnClickListener(v -> {
@@ -208,30 +205,20 @@ public class LightshowFragment extends Fragment {
             taschenlampeOff();
         }
         for (Map.Entry<String, ArrayList<Integer>> entry : lichtmuster.entrySet()) {
-            // Atmungseffekt: langsam heller werden
-            for (int i = 0; i <= entry.getValue().get(1); i++) {
-                taschenlampeOn(i);
-                try {
-                    Thread.sleep(entry.getValue().get(0));
-                } catch (InterruptedException e) {
-                    showErrorAlert("Es gab einen Fehler beim Abspielen der Lightshow.");
-                }
+            String key = entry.getKey();
+            ArrayList<Integer> value = entry.getValue();
+            try {
+                Thread.sleep(value.get(0));
+            } catch (InterruptedException e) {
+                showErrorAlert("Es gab einen Fehler beim Abspielen des Lichtmusters.");
             }
-            // Atmungseffekt: langsam dunkler werden
-            for (int i = entry.getValue().get(1); i >= 0; i--) {
-                taschenlampeOn(i);
-                try {
-                    Thread.sleep(entry.getValue().get(0));
-                } catch (InterruptedException e) {
-                    showErrorAlert("Es gab einen Fehler beim Abspielen der Lightshow.");
-                }
+            taschenlampeOn(value.get(1));
+            try {
+                Thread.sleep(value.get(0));
+            } catch (InterruptedException e) {
+                showErrorAlert("Es gab einen Fehler beim Abspielen des Lichtmusters.");
             }
             taschenlampeOff();
-            try {
-                Thread.sleep(900);
-            } catch (InterruptedException e) {
-                showErrorAlert("Es gab einen Fehler beim Abspielen der Lightshow.");
-            }
         }
     }
 
