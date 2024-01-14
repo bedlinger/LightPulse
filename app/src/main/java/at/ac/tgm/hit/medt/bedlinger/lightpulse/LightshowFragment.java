@@ -83,10 +83,10 @@ public class LightshowFragment extends Fragment {
                 @Override
                 public void onStopTrackingTouch(SeekBar seekBar) {}
             });
+        } else {
+            intensitaet = 100;
+            intensitaetSlider.setProgress(100);
         }
-
-        // now each buttons represents a step in the lightshow and the user can set the light pattern
-        // by clicking on the buttons he can set the duration of the light and the intensity
 
         b1.setOnClickListener(v -> {
             ArrayList<Integer> lichtmuster1 = new ArrayList<>();
