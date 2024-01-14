@@ -9,8 +9,6 @@ import androidx.viewpager2.widget.ViewPager2;
 import com.google.android.material.tabs.TabLayout;
 import com.google.android.material.tabs.TabLayoutMediator;
 
-import java.util.Objects;
-
 public class LightshowActivity extends AppCompatActivity {
 
     @Override
@@ -23,7 +21,7 @@ public class LightshowActivity extends AppCompatActivity {
 
         TabLayout tabLayout = findViewById(R.id.tablayout);
         new TabLayoutMediator(tabLayout, viewPager,
-                (tab, position) -> tab.setText("Lightshow " + (position + 1))
+                (tab, position) -> tab.setText("Lichtmuster " + (position + 1))
         ).attach();
     }
 
