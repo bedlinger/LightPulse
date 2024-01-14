@@ -30,7 +30,7 @@ import com.google.android.material.snackbar.Snackbar;
 public class MainActivity extends AppCompatActivity implements SensorEventListener {
 
     private static final int SHAKE_THRESHOLD_SOS = 80;
-    private static final int SHAKE_THRESHOLD_POWER_OFF = 10;
+    private static final int SHAKE_THRESHOLD_POWER_OFF = 15;
 
     private ImageButton batteryButton, lightPatternButton, settingsButton, powerButton;
     private SeekBar brightnessSlider;
@@ -231,7 +231,7 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
 
     private void checkOnShake(float x, float y, float z) {
         long curTime = System.currentTimeMillis();
-        if ((curTime - lastUpdate) > 100) {
+        if ((curTime - lastUpdate) > 200) {
             lastUpdate = curTime;
 
             double acceleration = Math.sqrt(Math.pow(x, 2) + Math.pow(y, 2) + Math.pow(z, 2)) - SensorManager.GRAVITY_EARTH;
