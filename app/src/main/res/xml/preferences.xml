@@ -1,21 +1,23 @@
 <?xml version="1.0" encoding="utf-8"?>
 <PreferenceScreen xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:android="http://schemas.android.com/apk/res/android" >
+    xmlns:android="http://schemas.android.com/apk/res/android">
+
     <SwitchPreferenceCompat
         android:key="auto_off"
         android:title="Automatisches Abschalten"
+        app:defaultValue="true"
+        android:summary="Automatisches Abschalten wenn das Gerät in der Hosentasche ist" />
+
+    <SwitchPreferenceCompat
+        android:key="sos_shake"
+        android:summary="SOS erkennen wenn das Gerät stark geschüttelt wird"
+        android:title="SOS erkennen"
         app:defaultValue="true" />
 
-    <PreferenceCategory
-        android:title="Schüttel Erkennung">
-
-        <SwitchPreferenceCompat
-            android:key="sos_shake"
-            android:title="SOS erkennen bei Schütteln"
-            app:defaultValue="true" />
-        <SwitchPreferenceCompat
-            android:key="toggle_flashlight_shake"
-            android:title="Aktivieren/Deaktivieren bei Schütteln" />
-    </PreferenceCategory>
+    <SwitchPreferenceCompat
+        android:key="toggle_flashlight_shake"
+        android:summary="Aktivieren/Deaktivieren der Taschenlampe wenn das Gerät geschüttelt wird"
+        android:title="Aktivieren/Deaktivieren"
+        app:defaultValue="false" />
 
 </PreferenceScreen>
