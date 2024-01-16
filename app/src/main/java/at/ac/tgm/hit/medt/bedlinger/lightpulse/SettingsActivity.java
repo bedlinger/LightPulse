@@ -1,13 +1,13 @@
 package at.ac.tgm.hit.medt.bedlinger.lightpulse;
 
 
-import androidx.preference.Preference;
-import androidx.preference.PreferenceFragmentCompat;
-import androidx.preference.SwitchPreferenceCompat;
 import android.os.Bundle;
 import android.widget.ImageButton;
 
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.preference.Preference;
+import androidx.preference.PreferenceFragmentCompat;
+import androidx.preference.SwitchPreferenceCompat;
 
 import com.google.android.material.appbar.MaterialToolbar;
 
