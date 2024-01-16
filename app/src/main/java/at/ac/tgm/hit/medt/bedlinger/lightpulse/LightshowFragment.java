@@ -230,7 +230,7 @@ public class LightshowFragment extends Fragment {
             String key = entry.getKey();
             ArrayList<Integer> value = entry.getValue();
             String valueString = value.get(0) + "," + value.get(1);
-            editor.putString(ARG_SHOW_NUMBER + key, valueString);
+            editor.putString(key + getArguments().getInt(ARG_SHOW_NUMBER), valueString);
         }
         editor.apply();
     }
@@ -238,7 +238,7 @@ public class LightshowFragment extends Fragment {
     public void loadLightPattern() {
         lichtmuster.clear();
         for (int i = 1; i <= 8; i++) {
-            String valueString = sharedPreferences.getString(ARG_SHOW_NUMBER + "b" + i, null);
+            String valueString = sharedPreferences.getString("b" + i + getArguments().getInt(ARG_SHOW_NUMBER), null);
             if (valueString != null) {
                 String[] parts = valueString.split(",");
                 ArrayList<Integer> value = new ArrayList<>();
