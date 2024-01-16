@@ -1,25 +1,20 @@
 <?xml version="1.0" encoding="utf-8"?>
 <PreferenceScreen xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:android="http://schemas.android.com/apk/res/android"
-    android:layout_width="match_parent">
+    app:switchPreferenceStyle="@style/CustomSwitchStyle" >
     <SwitchPreferenceCompat
-        android:layout_width="match_parent"
         android:key="auto_off"
         android:title="Automatisches Abschalten"
         app:defaultValue="true" />
 
     <PreferenceCategory
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
         android:title="Schüttel Erkennung">
 
         <SwitchPreferenceCompat
-            android:layout_width="match_parent"
             android:key="sos_shake"
             android:title="SOS erkennen bei Schütteln"
             app:defaultValue="true" />
         <SwitchPreferenceCompat
-            android:layout_width="match_parent"
             android:key="toggle_flashlight_shake"
             android:title="Aktivieren/Deaktivieren bei Schütteln" />
     </PreferenceCategory>
