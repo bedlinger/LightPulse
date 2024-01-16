@@ -11,8 +11,8 @@ LightPulse ist eine vielseitige Taschenlampen-App für Android, die entwickelt w
 - Benutzerdefinierte Lichtmuster: Erstellen eigener Lichtmuster durch die Kombination von Lichtintensitäten und Blinkraten.
 - Sensoren: Nutzen der Gyroskop- und Näherungssensoren für eine intelligente automatische Abschaltung und Energieeinsparung.
 - SOS-Signal: Sende ein SOS-Signal in Morsecode für Notfallsituationen.
-- Stromverbrauch: Überwache den Stromverbaruch deiner Taschenlampe.
 
 ## Ideen für weitere Funktionen:
 
+- Stromverbrauch: Überwache den Stromverbaruch deiner Taschenlampe.
 - Widget-Unterstützung: Schneller Zugriff über ein Homescreen-Widget.
