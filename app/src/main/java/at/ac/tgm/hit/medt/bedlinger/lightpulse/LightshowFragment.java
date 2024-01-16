@@ -1,6 +1,7 @@
 package at.ac.tgm.hit.medt.bedlinger.lightpulse;
 
 import android.content.Context;
+import android.content.SharedPreferences;
 import android.hardware.camera2.CameraAccessException;
 import android.hardware.camera2.CameraCharacteristics;
 import android.hardware.camera2.CameraManager;
@@ -30,6 +31,7 @@ public class LightshowFragment extends Fragment {
     private String cameraId;
     private boolean isTaschenlampeOn = false;
     private int dauer, intensitaet;
+    SharedPreferences sharedPreferences;
 
     private Map<String, ArrayList<Integer>> lichtmuster;
 
@@ -48,6 +50,7 @@ public class LightshowFragment extends Fragment {
         View view = inflater.inflate(R.layout.fragment_lightshow, container, false);
 
         init(view);
+        loadLightPattern();
         if (!hasIntensityControl) {
             intensitaetSlider.setEnabled(false);
         }
@@ -157,6 +160,7 @@ public class LightshowFragment extends Fragment {
                 showHintAlert("Es wurde kein vollständiges Lichtmuster eingegeben.");
             } else {
                 lichtmusterAbspielen();
+                saveLightPattern();
             }
         });
 
@@ -193,6 +197,7 @@ public class LightshowFragment extends Fragment {
             showErrorAlert("Es gab einen Fehler beim Zugriff auf die Taschenlampe.");
         }
         lichtmuster = new HashMap<>();
+        sharedPreferences = requireActivity().getSharedPreferences("LightshowPrefs", Context.MODE_PRIVATE);
     }
 
     public void lichtmusterAbspielen() {
@@ -214,6 +219,31 @@ public class LightshowFragment extends Fragment {
                 showErrorAlert("Es gab einen Fehler beim Abspielen des Lichtmusters.");
             }
             taschenlampeOff();
+        }
+    }
+
+    public void saveLightPattern() {
+        SharedPreferences.Editor editor = sharedPreferences.edit();
+        for (Map.Entry<String, ArrayList<Integer>> entry : lichtmuster.entrySet()) {
+            String key = entry.getKey();
+            ArrayList<Integer> value = entry.getValue();
+            String valueString = value.get(0) + "," + value.get(1);
+            editor.putString(ARG_SHOW_NUMBER + key, valueString);
+        }
+        editor.apply();
+    }
+
+    public void loadLightPattern() {
+        lichtmuster.clear();
+        for (int i = 1; i <= 8; i++) {
+            String valueString = sharedPreferences.getString(ARG_SHOW_NUMBER + "b" + i, null);
+            if (valueString != null) {
+                String[] parts = valueString.split(",");
+                ArrayList<Integer> value = new ArrayList<>();
+                value.add(Integer.parseInt(parts[0]));
+                value.add(Integer.parseInt(parts[1]));
+                lichtmuster.put("b" + i, value);
+            }
         }
     }
 
