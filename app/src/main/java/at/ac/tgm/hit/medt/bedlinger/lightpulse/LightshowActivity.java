@@ -31,7 +31,6 @@ public class LightshowActivity extends AppCompatActivity {
         Intent intent = getIntent();
         boolean hasIntensityControl = intent.getBooleanExtra("hasIntensityControl", true);
 
-        // Add your fragments here
         adapter.addFragment(LightshowFragment.newInstance(1, hasIntensityControl));
         adapter.addFragment(LightshowFragment.newInstance(2, hasIntensityControl));
         adapter.addFragment(LightshowFragment.newInstance(3, hasIntensityControl));

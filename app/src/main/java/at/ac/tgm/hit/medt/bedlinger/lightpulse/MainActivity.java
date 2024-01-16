@@ -30,7 +30,7 @@ import com.google.android.material.snackbar.Snackbar;
 public class MainActivity extends AppCompatActivity implements SensorEventListener {
 
     private static final int SHAKE_THRESHOLD_SOS = 80;
-    private static final int SHAKE_THRESHOLD_POWER_OFF = 15;
+    private static final int SHAKE_THRESHOLD_POWER_OFF = 10;
 
     private ImageButton batteryButton, lightPatternButton, settingsButton, powerButton;
     private SeekBar brightnessSlider;
@@ -137,7 +137,6 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
         powerButton = findViewById(R.id.powerButton);
         brightnessSlider = findViewById(R.id.helligkeitSlider);
         brightnessSlider.setProgress(brightness);
-        brightnessSlider.setMin(1);
         akkuTextView = findViewById(R.id.akkuTextView);
         sosButton = findViewById(R.id.sosButton);
         akkuReceiver = new BroadcastReceiver() {
@@ -148,6 +147,9 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
         };
         sensorManager = (SensorManager) getSystemService(Context.SENSOR_SERVICE);
         hasAccelerometer = sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER) != null;
+        if (!hasAccelerometer) {
+            showErrorAlert("Ihr Gerät unterstützt keinen Beschleunigungssensor.");
+        }
         hasProximitySensor = sensorManager.getDefaultSensor(Sensor.TYPE_PROXIMITY) != null;
         if (hasProximitySensor) {
             proximitySensor = sensorManager.getDefaultSensor(Sensor.TYPE_PROXIMITY);
@@ -155,8 +157,8 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
             showErrorAlert("Ihr Gerät unterstützt keinen Näherungssensor.");
         }
         sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
-        checkForSOS = sharedPreferences.getBoolean("sos_shake", false);
-        powerOnShake = sharedPreferences.getBoolean("toggle_flashlight_shake", true);
+        checkForSOS = sharedPreferences.getBoolean("sos_shake", true);
+        powerOnShake = sharedPreferences.getBoolean("toggle_flashlight_shake", false);
         automaticPowerOff = sharedPreferences.getBoolean("auto_off", true);
     }
 
@@ -273,10 +275,10 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
         }
         sharedPreferences.registerOnSharedPreferenceChangeListener((sharedPreferences, key) -> {
             if (key.equals("sos_shake")) {
-                checkForSOS = sharedPreferences.getBoolean("sos_shake", false);
+                checkForSOS = sharedPreferences.getBoolean("sos_shake", true);
             }
             if (key.equals("toggle_flashlight_shake")) {
-                powerOnShake = sharedPreferences.getBoolean("toggle_flashlight_shake", true);
+                powerOnShake = sharedPreferences.getBoolean("toggle_flashlight_shake", false);
             }
             if (key.equals("auto_off")) {
                 automaticPowerOff = sharedPreferences.getBoolean("auto_off", true);

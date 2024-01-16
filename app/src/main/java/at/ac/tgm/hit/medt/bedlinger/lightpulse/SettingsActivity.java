@@ -1,20 +1,34 @@
 package at.ac.tgm.hit.medt.bedlinger.lightpulse;
 
 
+import androidx.preference.Preference;
 import androidx.preference.PreferenceFragmentCompat;
 import androidx.preference.SwitchPreferenceCompat;
 import android.os.Bundle;
+import android.widget.ImageButton;
+
 import androidx.appcompat.app.AppCompatActivity;
+
+import com.google.android.material.appbar.MaterialToolbar;
 
 public class SettingsActivity extends AppCompatActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_settings);
+
+        MaterialToolbar actionbar = findViewById(R.id.actionbar);
+        actionbar.setTitle("Einstellungen");
+        this.setSupportActionBar(actionbar);
+
         getSupportFragmentManager()
                 .beginTransaction()
-                .replace(android.R.id.content, new SettingsFragment())
+                .replace(R.id.settings, new SettingsFragment())
                 .commit();
+
+        ImageButton returnButton = findViewById(R.id.returnButton2);
+        returnButton.setOnClickListener(v -> finish());
     }
 
     public static class SettingsFragment extends PreferenceFragmentCompat {
@@ -25,35 +39,19 @@ public class SettingsActivity extends AppCompatActivity {
             SwitchPreferenceCompat sosShakePreference = findPreference("sos_shake");
             SwitchPreferenceCompat toggleFlashlightShakePreference = findPreference("toggle_flashlight_shake");
 
-            if (sosShakePreference != null) {
-                sosShakePreference.setOnPreferenceChangeListener((preference, newValue) -> {
-                    if ((Boolean) newValue) {
-                        if (toggleFlashlightShakePreference != null) {
-                            toggleFlashlightShakePreference.setChecked(false);
-                        }
-                    } else {
-                        if (toggleFlashlightShakePreference != null) {
-                            toggleFlashlightShakePreference.setChecked(true);
-                        }
-                    }
-                    return true;
-                });
-            }
+            Preference.OnPreferenceChangeListener listener = (preference, newValue) -> {
+                if (preference.getKey().equals("sos_shake")) {
+                    toggleFlashlightShakePreference.setChecked(!(Boolean) newValue);
+                    sosShakePreference.setChecked((Boolean) newValue);
+                } else if (preference.getKey().equals("toggle_flashlight_shake")) {
+                    sosShakePreference.setChecked(!(Boolean) newValue);
+                    toggleFlashlightShakePreference.setChecked((Boolean) newValue);
+                }
+                return true;
+            };
 
-            if (toggleFlashlightShakePreference != null) {
-                toggleFlashlightShakePreference.setOnPreferenceChangeListener((preference, newValue) -> {
-                    if ((Boolean) newValue) {
-                        if (sosShakePreference != null) {
-                            sosShakePreference.setChecked(false);
-                        }
-                    } else {
-                        if (sosShakePreference != null) {
-                            sosShakePreference.setChecked(true);
-                        }
-                    }
-                    return true;
-                });
-            }
+            sosShakePreference.setOnPreferenceChangeListener(listener);
+            toggleFlashlightShakePreference.setOnPreferenceChangeListener(listener);
         }
     }
 }
