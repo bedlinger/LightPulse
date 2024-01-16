@@ -10,13 +10,13 @@
 
     <SwitchPreferenceCompat
         android:key="sos_shake"
-        android:summary="SOS erkennen wenn das Gerät stark geschüttelt wird"
+        android:summary="SOS erkennen bei starkem Schütteln"
         android:title="SOS erkennen"
         app:defaultValue="true" />
 
     <SwitchPreferenceCompat
         android:key="toggle_flashlight_shake"
-        android:summary="Aktivieren/Deaktivieren der Taschenlampe wenn das Gerät geschüttelt wird"
+        android:summary="Aktivieren/Deaktivieren der Taschenlampe durch Schütteln"
         android:title="Aktivieren/Deaktivieren"
         app:defaultValue="false" />
 
