@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <PreferenceScreen xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:android="http://schemas.android.com/apk/res/android"
-    app:switchPreferenceStyle="@style/CustomSwitchStyle" >
+    xmlns:android="http://schemas.android.com/apk/res/android" >
     <SwitchPreferenceCompat
         android:key="auto_off"
         android:title="Automatisches Abschalten"
