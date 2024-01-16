@@ -69,12 +69,7 @@ public class LightshowFragment extends Fragment {
             intensitaetSlider.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
                 @Override
                 public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
-                    try {
-                        int maxBrightness = cameraManager.getCameraCharacteristics(cameraId).get(CameraCharacteristics.FLASH_INFO_STRENGTH_MAXIMUM_LEVEL);
-                        intensitaet = (int) (progress * maxBrightness / 100.0);
-                    } catch (CameraAccessException e) {
-                        showErrorAlert("Es gab einen Fehler beim Zugriff auf die Taschenlampe.");
-                    }
+                    intensitaet = progress;
                 }
 
                 @Override
