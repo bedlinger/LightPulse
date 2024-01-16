@@ -12,6 +12,7 @@ import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.ImageButton;
 import android.widget.SeekBar;
+import android.widget.Toast;
 
 import androidx.appcompat.app.AlertDialog;
 import androidx.fragment.app.Fragment;
@@ -161,6 +162,7 @@ public class LightshowFragment extends Fragment {
             } else {
                 lichtmusterAbspielen();
                 saveLightPattern();
+                Toast.makeText(requireActivity(), "Das Lichtmuster wurde abgespeichert!", Toast.LENGTH_SHORT).show();
             }
         });
 
